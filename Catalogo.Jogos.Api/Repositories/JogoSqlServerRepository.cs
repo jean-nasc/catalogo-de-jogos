@@ -14,6 +14,7 @@ namespace Catalogo.Jogos.Api.Repositories
         public JogoSqlServerRepository(IConfiguration configuration)
         {
             sqlConnection = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
+            CriarTabela();
         }
 
         public async Task<List<Jogo>> Obter(int pagina, int quantidade)
@@ -122,6 +123,19 @@ namespace Catalogo.Jogos.Api.Repositories
             SqlCommand sqlCommand = new SqlCommand(comando, sqlConnection);
             sqlCommand.ExecuteNonQuery();
             await sqlConnection.CloseAsync();
+        }
+
+        public void CriarTabela()
+        {
+            var comando = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'Jogos') BEGIN CREATE TABLE Jogos (Id char(36) PRIMARY KEY,";
+            comando += "Nome varchar(80) NOT NULL,";
+            comando += "Produtora varchar(80) NOT NULL,";
+            comando += "Preco varchar(14) NOT NULL) END";
+
+            sqlConnection.Open();
+            SqlCommand sqlCommand = new SqlCommand(comando, sqlConnection);
+            sqlCommand.ExecuteNonQuery();
+            sqlConnection.Close();
         }
 
         public void Dispose()
